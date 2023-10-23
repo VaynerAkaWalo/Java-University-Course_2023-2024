@@ -3,6 +3,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Collections;
 import java.util.EmptyStackException;
@@ -26,7 +27,7 @@ class CalculatorTest {
         return Stream.of(0, 1, 2, 3, 5, 8, 13, -21, -34);
     }
 
-    private static Stream<Arguments> addToAccumulatorShouldAddGivenValueToAccumulator() {
+    private static Stream<Arguments> valuesForAdditionTests() {
         return Stream.of(
                 Arguments.of(List.of(1, 2, 3, 5), 11),
                 Arguments.of(List.of(10, 20, 30, 50), 110),
@@ -35,7 +36,7 @@ class CalculatorTest {
         );
     }
 
-    private static Stream<Arguments> subtractFromAccumulatorShouldSubtractGivenValueFromAccumulator() {
+    private static Stream<Arguments> valuesForSubtractionTests() {
         return Stream.of(
                 Arguments.of(List.of(2), -2),
                 Arguments.of(List.of(1, 2, 3, 5), -11),
@@ -115,7 +116,7 @@ class CalculatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource
+    @MethodSource("valuesForAdditionTests")
     void addToAccumulatorShouldAddGivenValueToAccumulator(List<Integer> numbers, int excepted) {
         numbers.forEach(calculator::addToAccumulator);
 
@@ -123,7 +124,7 @@ class CalculatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource
+    @MethodSource("valuesForSubtractionTests")
     void subtractFromAccumulatorShouldSubtractGivenValueFromAccumulator(List<Integer> numbers, int excepted) {
         numbers.forEach(calculator::subtractFromAccumulator);
 
@@ -156,5 +157,55 @@ class CalculatorTest {
             calculator.pullAccumulatorFromStack();
             assertThat(calculator.getAccumulator(), is(number));
         });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-3, -1, 0, 3, 5})
+    void exchangeMemoryWithAccumulatorShouldExchangeValueBetweenAccumulatorAndMemoryAtGivenIndex(int number) {
+        for (int i = 0; i < CalculatorOperations.MEMORY_SIZE; i++) {
+            calculator.setAccumulator(number);
+
+            assertThat(calculator.getMemory(i), is(0));
+            assertThat(calculator.getAccumulator(), is(number));
+
+            calculator.exchangeMemoryWithAccumulator(i);
+
+            assertThat(calculator.getMemory(i), is(number));
+            assertThat(calculator.getAccumulator(), is(0));
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("valuesForAdditionTests")
+    void addMemoryToAccumulatorShouldAddMemoryValueToAccumulator(List<Integer> numbers, int excepted) {
+        for (int i = 0; i < numbers.size(); i++) {
+            calculator.setAccumulator(numbers.get(i));
+            calculator.accumulatorToMemory(i);
+        }
+
+        calculator.setAccumulator(0);
+
+        for (int i = 0; i < numbers.size(); i++) {
+            calculator.addMemoryToAccumulator(i);
+        }
+
+        assertThat(calculator.getAccumulator(), is(excepted));
+    }
+
+    @ParameterizedTest
+    @MethodSource("valuesForSubtractionTests")
+    void subtractFromAccumulatorShouldAddMemoryValueToAccumulator(List<Integer> numbers, int excepted) {
+        for (int i = 0; i < numbers.size(); i++) {
+            calculator.setAccumulator(numbers.get(i));
+            calculator.accumulatorToMemory(i);
+        }
+
+        calculator.setAccumulator(0);
+
+        for (int i = 0; i < numbers.size(); i++) {
+            calculator.subtractMemoryFromAccumulator(i);
+        }
+
+        assertThat(calculator.getAccumulator(), is(excepted));
     }
 }
