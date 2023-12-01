@@ -5,10 +5,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Collections;
-import java.util.EmptyStackException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -78,8 +75,10 @@ class CalculatorTest {
             try {
                 calculator.pullAccumulatorFromStack();
                 assertThat(calculator.getAccumulator(), is(0));
-            } catch (Exception e) {
+            } catch (EmptyStackException e) {
                 assertThat(e.getClass(), is(EmptyStackException.class));
+            } catch (NoSuchElementException e) {
+                assertThat(e.getClass(), is(NoSuchElementException.class));
             }
         }
     }
@@ -101,8 +100,10 @@ class CalculatorTest {
             try {
                 calculator.pullAccumulatorFromStack();
                 assertThat(calculator.getAccumulator(), is(0));
-            } catch (Exception e) {
+            } catch (EmptyStackException e) {
                 assertThat(e.getClass(), is(EmptyStackException.class));
+            } catch (NoSuchElementException e) {
+                assertThat(e.getClass(), is(NoSuchElementException.class));
             }
         }
     }
